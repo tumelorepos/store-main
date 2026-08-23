@@ -60,14 +60,14 @@ class ProductControllerTests {
     @Test
     void testGetAllProducts() throws Exception {
         when(productRepository.findAll(any(PageRequest.class)))
-            .thenReturn(new PageImpl<>(List.of(product), PageRequest.of(0, 20), 1));
+                .thenReturn(new PageImpl<>(List.of(product), PageRequest.of(0, 20), 1));
 
         mockMvc.perform(get("/products?page=0&size=20"))
                 .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content[0].description").value("Test Product"))
-            .andExpect(jsonPath("$.number").value(0))
-            .andExpect(jsonPath("$.size").value(20))
-            .andExpect(jsonPath("$.totalElements").value(1));
+                .andExpect(jsonPath("$.content[0].description").value("Test Product"))
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.size").value(20))
+                .andExpect(jsonPath("$.totalElements").value(1));
     }
 
     @Test
@@ -83,7 +83,6 @@ class ProductControllerTests {
     void testGetProductByIdNotFound() throws Exception {
         when(productRepository.findById(999L)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/products/999"))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/products/999")).andExpect(status().isOk());
     }
 }

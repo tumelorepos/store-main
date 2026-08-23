@@ -23,8 +23,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -76,14 +76,14 @@ class OrderControllerTests {
     @Test
     void testGetOrder() throws Exception {
         when(orderRepository.findAll(any(PageRequest.class)))
-            .thenReturn(new PageImpl<>(List.of(order), PageRequest.of(0, 20), 1));
+                .thenReturn(new PageImpl<>(List.of(order), PageRequest.of(0, 20), 1));
 
         mockMvc.perform(get("/order?page=0&size=20"))
                 .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content[0].description").value("Test Order"))
-            .andExpect(jsonPath("$.content[0].customer.name").value("John Doe"))
-            .andExpect(jsonPath("$.number").value(0))
-            .andExpect(jsonPath("$.size").value(20))
-            .andExpect(jsonPath("$.totalElements").value(1));
+                .andExpect(jsonPath("$.content[0].description").value("Test Order"))
+                .andExpect(jsonPath("$.content[0].customer.name").value("John Doe"))
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.size").value(20))
+                .andExpect(jsonPath("$.totalElements").value(1));
     }
 }
