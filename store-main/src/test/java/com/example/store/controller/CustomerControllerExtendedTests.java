@@ -10,12 +10,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -49,30 +54,33 @@ class CustomerControllerExtendedTests {
 
     @Test
     void testGetAllCustomersWithoutQuery() throws Exception {
-        when(customerRepository.findAll()).thenReturn(List.of(customer1, customer2));
+        when(customerRepository.findAll(any(PageRequest.class)))
+                .thenReturn(new PageImpl<>(List.of(customer1, customer2), PageRequest.of(0, 20), 2));
 
         mockMvc.perform(get("/customer"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("John Doe"))
-                .andExpect(jsonPath("$[1].name").value("Jane Smith"));
+                .andExpect(jsonPath("$.content[0].name").value("John Doe"))
+                .andExpect(jsonPath("$.content[1].name").value("Jane Smith"));
     }
 
     @Test
     void testGetCustomersByNameQuery() throws Exception {
-        when(customerRepository.findByNameContainsIgnoreCase("John")).thenReturn(List.of(customer1));
+        when(customerRepository.findByNameContainsIgnoreCase(eq("John"), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(customer1), PageRequest.of(0, 20), 1));
 
         mockMvc.perform(get("/customer?query=John"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("John Doe"));
+                .andExpect(jsonPath("$.content[0].name").value("John Doe"));
     }
 
     @Test
     void testGetCustomersByNameQueryNoMatch() throws Exception {
-        when(customerRepository.findByNameContainsIgnoreCase("Unknown")).thenReturn(List.of());
+        when(customerRepository.findByNameContainsIgnoreCase(eq("Unknown"), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 20), 0));
 
         mockMvc.perform(get("/customer?query=Unknown"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", List.of()));
+                .andExpect(jsonPath("$.content").isEmpty());
     }
 
     @Test
